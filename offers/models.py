@@ -56,8 +56,10 @@ class OfferDetail(models.Model):
     offer_type = models.CharField(max_length=255)
 
     def get_features(self):
-        data = self.features.split(",")  # convert string to list
-        return data
+        try:
+            return json.loads(self.features)
+        except (json.JSONDecodeError, TypeError):
+            return []
 
     def set_features(self, features):
         self.features = json.dumps(features)

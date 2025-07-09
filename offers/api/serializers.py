@@ -3,6 +3,7 @@ from offers.models import Offer, OfferDetail
 from datetime import datetime
 import json
 from django.db.models import Min
+from django.urls import reverse
 
 
 class OfferDetailSerializer(serializers.ModelSerializer):
@@ -14,7 +15,15 @@ class OfferDetailSerializer(serializers.ModelSerializer):
                   'features', 'offer_type']
 
     def get_url(self, obj):
-        return f"/offerdetails/{obj.id}/"
+        request = self.context.get('request')
+
+        if request:
+            if request.path.startswith('/api/offers/' + str(obj.offers.all().first().id) + '/'):
+                return request.build_absolute_uri(reverse('offer-detail-detail', kwargs={'pk': obj.id}))
+            else:
+                return f"/offerdetails/{obj.id}/"
+        else:
+            return f"/offerdetails/{obj.id}/"
 
     def get_fields(self):
         fields = super().get_fields()
