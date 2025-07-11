@@ -65,11 +65,11 @@ class SingleOfferAPIView(RetrieveUpdateDestroyAPIView):
     def update(self, request, *args, **kwargs):
         offer = self.get_object()
 
-        if request.data['details']:
+        if request.data.get('details'):
             details_data = request.data.pop('details')
             for detail_data in details_data:
                 offer_type = detail_data['offer_type']
-                if detail_data['features']:
+                if detail_data.get('features'):
                     features = json.dumps(detail_data.pop('features'))
                     detail_data['features'] = features
                 detail = offer.details.get(offer_type=offer_type)
@@ -79,6 +79,8 @@ class SingleOfferAPIView(RetrieveUpdateDestroyAPIView):
                     detail_serializer.save()
                 else:
                     raise ValidationError(detail_serializer.errors)
+        else:
+            raise ValidationError({"details": "Details are required"})
 
         return super().update(request, *args, **kwargs)
 
