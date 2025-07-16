@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from coderr.views import BaseInfoView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -23,5 +24,8 @@ urlpatterns = [
     path('api/', include('profiles.api.urls')),
     path('api/', include('offers.api.urls')),
     path('api/', include('orders.api.urls')),
+    path('api/', include('reviews.api.urls')),
+    path('api/base-info/', BaseInfoView.as_view(), name='base-info'),
+
 
 ]
