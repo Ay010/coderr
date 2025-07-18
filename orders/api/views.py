@@ -45,6 +45,11 @@ class OrderListCreateView(generics.ListCreateAPIView):
         return Response(response_data, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
+        if type(request.data.get('offer_detail_id')) != int:
+            return Response({"error": "Offer detail id must be an integer"}, status=status.HTTP_400_BAD_REQUEST)
+        if not OfferDetail.objects.filter(id=request.data.get('offer_detail_id')).exists():
+            return Response({"error": "Offer detail not found"}, status=status.HTTP_404_NOT_FOUND)
+
         offer_detail_id = request.data.get('offer_detail_id')
         offerDetail = OfferDetail.objects.get(id=offer_detail_id)
 
@@ -136,9 +141,12 @@ class OrderCountView(generics.GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         user_id = kwargs['pk']
-        if User.objects.get(id=user_id).type == "business":
-            order_count_filtered = Order.objects.filter(
-                business_user=user_id, status="in_progress").count()
+        if User.objects.filter(id=user_id).exists():
+            if User.objects.get(id=user_id).type == "business":
+                order_count_filtered = Order.objects.filter(
+                    business_user=user_id, status="in_progress").count()
+            else:
+                return Response({"error": "User is not a business user"}, status=status.HTTP_400_BAD_REQUEST)
 
         else:
             return Response({"error": "Business user not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -151,10 +159,13 @@ class CompletedOrderCountView(generics.GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         user_id = kwargs['pk']
-        if User.objects.get(id=user_id).type == "business":
-            order_count_filtered = Order.objects.filter(
-                business_user=user_id, status="completed").count()
+        if User.objects.filter(id=user_id).exists():
+            if User.objects.get(id=user_id).type == "business":
+                order_count_filtered = Order.objects.filter(
+                    business_user=user_id, status="completed").count()
+            else:
+                return Response({"error": "User is not a business user"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({"error": "Business user not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        return Response({"order_count": order_count_filtered}, status=status.HTTP_200_OK)
+        return Response({"completed_order_count": order_count_filtered}, status=status.HTTP_200_OK)

@@ -1,6 +1,6 @@
 from rest_framework import generics
 from django_filters import rest_framework as filters
-from django.db.models import Min
+from django.db.models import Min, Max
 from offers.models import Offer
 from offers.api.serializers import OfferSerializer
 from rest_framework.filters import OrderingFilter
@@ -8,8 +8,8 @@ from rest_framework.filters import OrderingFilter
 
 class OfferFilter(filters.FilterSet):
     min_price = filters.NumberFilter(method='filter_min_price')
-    min_delivery_time = filters.NumberFilter(
-        method='filter_min_delivery_time')
+    max_delivery_time = filters.NumberFilter(
+        method='filter_max_delivery_time')
     creator_id = filters.CharFilter(
         field_name="user__id", lookup_expr='in')
 
@@ -25,13 +25,13 @@ class OfferFilter(filters.FilterSet):
             calculated_min_price=Min('details__price')
         ).filter(calculated_min_price__gte=value)
 
-    def filter_min_delivery_time(self, queryset, name, value):
+    def filter_max_delivery_time(self, queryset, name, value):
         """
-        Filter offers based on the minimum delivery time from offer details
+        Filtert Angebote, deren minimale Lieferzeit kleiner oder gleich max_delivery_time ist
         """
         return queryset.annotate(
             calculated_min_delivery_time=Min('details__delivery_time_in_days')
-        ).filter(calculated_min_delivery_time__gte=value)
+        ).filter(calculated_min_delivery_time__lte=value)
 
 
 class CustomOrderingFilter(OrderingFilter):

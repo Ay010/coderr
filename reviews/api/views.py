@@ -39,6 +39,13 @@ class ReviewDetailView(RetrieveUpdateDestroyAPIView):
     serializer_class = ReviewSerializer
     permission_classes = [IsCreator]
 
+    def post(self, request, *args, **kwargs):
+        request.data['created_at'] = datetime.now().strftime(
+            '%Y-%m-%d %H:%M:%S')
+        request.data['updated_at'] = datetime.now().strftime(
+            '%Y-%m-%d %H:%M:%S')
+        return super().post(request, *args, **kwargs)
+
     def update(self, request, *args, **kwargs):
         # Erstelle ein neues Dictionary mit den zu aktualisierenden Daten
         update_data = {}
@@ -48,7 +55,8 @@ class ReviewDetailView(RetrieveUpdateDestroyAPIView):
             update_data['description'] = request.data.get('description')
 
         # Füge updated_at hinzu
-        update_data['updated_at'] = datetime.now()
+        update_data['updated_at'] = datetime.now().strftime(
+            '%Y-%m-%d %H:%M:%S')
 
         # Erstelle eine Kopie des Requests mit den neuen Daten
         request._full_data = update_data

@@ -14,6 +14,12 @@ class OfferDetailSerializer(serializers.ModelSerializer):
         fields = ['id', 'url', 'title', 'revisions', 'delivery_time_in_days', 'price',
                   'features', 'offer_type']
 
+    def validate_offer_type(self, value):
+        if value not in ['standard', 'premium', 'exclusive']:
+            raise serializers.ValidationError(
+                "Invalid offer type. Must be 'standard', 'premium', or 'exclusive'.")
+        return value
+
     def get_url(self, obj):
         request = self.context.get('request')
 
@@ -82,6 +88,13 @@ class OfferSerializer(serializers.ModelSerializer):
         model = Offer
         fields = ['id', 'user', 'title', 'image', 'description',
                   'details', 'created_at', 'updated_at', 'min_price', 'min_delivery_time', 'user_details']
+
+    def validate_details(self, details):
+        for detail in details:
+            if not detail.get('offer_type'):
+                raise serializers.ValidationError(
+                    {"details": "Offer type is required"})
+        return details
 
     def get_fields(self):
         fields = super().get_fields()

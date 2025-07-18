@@ -1,6 +1,5 @@
 # Coderr - IT Freelancer Platform
 
-![Coderr Logo](FrontEnd/assets/logo/logo_coderr.svg)
 
 A comprehensive platform connecting businesses with IT freelancers, built with Django REST API backend and Vanilla JavaScript frontend.
 

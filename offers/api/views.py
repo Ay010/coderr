@@ -50,7 +50,7 @@ class OfferListCreateAPIView(ListCreateAPIView):
                 offer.save()
             else:
                 raise ValidationError(offer_detail_serializer.errors)
-        return Response(OfferSerializer(offer, context={'request': request}).data)
+        return Response(OfferSerializer(offer, context={'request': request}).data, status=status.HTTP_201_CREATED)
 
 
 class SingleOfferAPIView(RetrieveUpdateDestroyAPIView):
@@ -62,16 +62,25 @@ class SingleOfferAPIView(RetrieveUpdateDestroyAPIView):
             return [IsCreator()]
         return [IsAuthenticated()]
 
-    def update(self, request, *args, **kwargs):
-        offer = self.get_object()
+    def validate_details(self, details):
+        for detail in details:
+            if not detail.get('offer_type'):
+                raise ValidationError(
+                    {"details": "Offer type is required"})
+        return details
 
+    def update(self, request, *args, **kwargs):
         if request.data.get('details'):
+            details = self.validate_details(request.data.get('details'))
+
             details_data = request.data.pop('details')
             for detail_data in details_data:
                 offer_type = detail_data['offer_type']
                 if detail_data.get('features'):
                     features = json.dumps(detail_data.pop('features'))
                     detail_data['features'] = features
+
+                offer = self.get_object()
                 detail = offer.details.get(offer_type=offer_type)
                 detail_serializer = OfferDetailSerializer(
                     detail, data=detail_data)

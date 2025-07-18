@@ -15,10 +15,3 @@ class ReviewSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "business_user must be type business")
         return business_user
-
-    def save(self, **kwargs):
-        kwargs['created_at'] = datetime.now().strftime(
-            '%Y-%m-%d %H:%M:%S')
-        kwargs['updated_at'] = datetime.now().strftime(
-            '%Y-%m-%d %H:%M:%S')
-        return super().save(**kwargs)
