@@ -73,6 +73,7 @@ class SingleOfferAPIView(RetrieveUpdateDestroyAPIView):
         if request.data.get('details'):
             details = self.validate_details(request.data.get('details'))
 
+            offer = self.get_object()
             details_data = request.data.pop('details')
             for detail_data in details_data:
                 offer_type = detail_data['offer_type']
@@ -80,14 +81,18 @@ class SingleOfferAPIView(RetrieveUpdateDestroyAPIView):
                     features = json.dumps(detail_data.pop('features'))
                     detail_data['features'] = features
 
-                offer = self.get_object()
-                detail = offer.details.get(offer_type=offer_type)
-                detail_serializer = OfferDetailSerializer(
-                    detail, data=detail_data)
-                if detail_serializer.is_valid():
-                    detail_serializer.save()
-                else:
-                    raise ValidationError(detail_serializer.errors)
+                try:
+                    detail = offer.details.get(offer_type=offer_type)
+                    detail_serializer = OfferDetailSerializer(
+                        detail, data=detail_data)
+                    if detail_serializer.is_valid():
+                        detail_serializer.save()
+                    else:
+                        raise ValidationError(detail_serializer.errors)
+                except OfferDetail.DoesNotExist:
+                    raise ValidationError(
+                        {"details": "Invalid offer type. Must be 'basic', 'standard', or 'premium'."}
+                    )
         else:
             raise ValidationError({"details": "Details are required"})
 
