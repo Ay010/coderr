@@ -15,9 +15,9 @@ class OfferDetailSerializer(serializers.ModelSerializer):
                   'features', 'offer_type']
 
     def validate_offer_type(self, value):
-        if value not in ['standard', 'premium', 'exclusive']:
+        if value not in ['basic', 'standard', 'premium']:
             raise serializers.ValidationError(
-                "Invalid offer type. Must be 'standard', 'premium', or 'exclusive'.")
+                "Invalid offer type. Must be 'basic', 'standard', or 'premium'.")
         return value
 
     def get_url(self, obj):
