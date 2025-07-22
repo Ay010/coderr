@@ -45,12 +45,17 @@ class OrderListCreateView(generics.ListCreateAPIView):
         return Response(response_data, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
-        if type(request.data.get('offer_detail_id')) != int:
-            return Response({"error": "Offer detail id must be an integer"}, status=status.HTTP_400_BAD_REQUEST)
-        if not OfferDetail.objects.filter(id=request.data.get('offer_detail_id')).exists():
-            return Response({"error": "Offer detail not found"}, status=status.HTTP_404_NOT_FOUND)
 
         offer_detail_id = request.data.get('offer_detail_id')
+        if offer_detail_id is None:
+            return Response({"error": "Offer detail id is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            offer_detail_id = int(offer_detail_id)
+        except (ValueError, TypeError):
+            return Response({"error": "Offer detail id must be an integer"}, status=status.HTTP_400_BAD_REQUEST)
+        if not OfferDetail.objects.filter(id=offer_detail_id).exists():
+            return Response({"error": "Offer detail not found"}, status=status.HTTP_404_NOT_FOUND)
         offerDetail = OfferDetail.objects.get(id=offer_detail_id)
 
         order = Order.objects.create(
